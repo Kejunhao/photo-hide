@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+ <head>
+ <meta charset="utf-8" />
+  <title> 对图片进行加密 </title>
+  <link rel="stylesheet" type="text/css" href="kjh.css">
+  <style>
+  
+  
+  #section1{
+  border:5px red solid;
+  width:700px;
+   background:#ff7575;
+    background-size:100% 100%;
+  }
+  
+  #section2{
+  border:5px red solid;
+  width:700px;
+  height:280px;
+  background:skyblue;
+  overflow:auto;
+  }
+  
+   #section3{
+  border:5px yellow solid;
+  width:700px;
+  background:#5c5cad;
+  }  
+  
+   #section3p{
+  
+  width:700px;
+  background:#FFFFFF;
+  height:100px;
+  overflow:auto;
+  }  
+  
+  
+  #section4{
+  border:5px yellow solid;
+  width:700px;
+  background:#ffff73;
+  }
+ 
+  
+  
+  
+  
+  
+  
+	
+  .submit{
+	width: 85px;
+	height: 30px;
+	background:#0099FF;
+	color: blue;
+	border-radius: 20px;
+  }
+  
+  
+  
+  x-sign {
+  --interval: 1s;
+  display: block;
+  text-shadow: 
+    0 0 10px var(--color1),
+    0 0 20px var(--color2),
+    0 0 40px var(--color3),
+    0 0 80px var(--color4);
+  will-change: filter, color;
+  filter: saturate(60%);
+  animation: flicker steps(100) var(--interval) 1s infinite;
+}
+  
+  x-sign:nth-of-type(1) {
+  color: lightyellow;
+  --color1: yellow;
+  --color2: gold;
+  --color3: orange;
+  --color4: darkred;
+  font-family: Sriracha;
+}
+h2{
+color:lime;
+}
+  
+h3{
+color:gold;
+}
+  </style>
+  
+ </head>
+
+ <body>   
+ 
+ 
+	<div align="center">
+ 
+		<div id="section1">
+        <h1><x-sign>一、请选择一张图片进行加密或者解密：</x-sign></h1>
+		<div>
+        <input type='file' id='file' value="上传图片"/>
+		<div id="aa"></div><div id="bb"></div>
+        </div>
+		
+		</div>
+		
+		<img id='preview' class='preview hide'/>
+	</br></br></br></br></br>
+	
+	
+	<div id="section2">
+	<h1><x-sign>二、加密或解密</x-sign></h1>
+	<h2>加密</h2>
+	<h3>文本加密</h3>
+	
+	 <header class="jd_search">
+        <div class="jd_search_box">
+            <form>
+                 <input id='message' class='message' onchange="document.getElementById('bb').innerHTML=this.value.length" placeholder="请输入要加密的内容" />
+			 </form>
+			 <button id='encode' class='submit'>加密文本</button>
+        </div>
+    </header>
+	
+	
+	</br>
+	<h3>图片加密</h3>
+	<input type='file' id='file2' />
+	<button id='encode2' class='submit'>加密图片</button> 
+					
+		
+
+
+
+	<div id="section3">
+			<h2>解密</h2>
+			<h3>文本解密</h3>	
+		<header class="jd_search">
+        <div class="jd_search_box">
+			 <form>
+                 <input id='message2' class='message' onchange="document.getElementById('bb').innerHTML=this.value.length" placeholder="点击下方即可解密，解密后内容会在此显示" />
+			 </form>
+		 </div>
+		</header>
+				<button id='decode' class='submit'>解密文本</button></br>	
+				<br><br>
+		<div id="section3p">
+			<h3>图片解密</h3>
+                <button id='decode2' class='submit'>解密图片</button>
+				<label><input type="checkbox" id="debug" />调试模式</label>
+		</div>
+	</div>
+			</div>
+		</br></br></br></br></br>	
+			
+		
+
+		
+		<div id="section4">
+		<h1><x-sign>三、下载加密或解密后的图片</x-sign></h1>	
+		<div id="files"></div>
+			</div>
+			
+			
+    <canvas id='canvas' style="display:none;"></canvas>
+    <img id='output'/>
+			
+
+
+		</div>
+  <script type="text/javascript" src="imagemask.js"></script>
+  <script type="text/javascript">
+var mask = new ImageMask({debug: false});
+  window.onload = function() {
+    // add action to the file input
+    var input = document.getElementById('file');
+    input.addEventListener('change', importImage);
+    // add action to the encode button
+    var encodeButton = document.getElementById('encode');
+    encodeButton.addEventListener('click', encode);
+    // add action to the decode button
+    var decodeButton = document.getElementById('decode');
+    decodeButton.addEventListener('click', decode);
+    // add action to the encode button
+    var encodeButton2 = document.getElementById('encode2');
+    encodeButton2.addEventListener('click', encode2);
+    // add action to the decode button
+    var decodeButton2 = document.getElementById('decode2');
+    decodeButton2.addEventListener('click', decode2);
+};
+// put image in the canvas and display it
+var importImage = function(e) {
+    var reader = new FileReader();
+    reader.onload = function(event) {
+        // set the preview
+        document.getElementById('preview').style.display = 'block';
+        document.getElementById('preview').src = event.target.result;
+        // wipe all the fields clean
+        document.getElementById('message').value = '';
+        document.getElementById('output').src = '';
+        // read the data into the canvas element
+        var img = new Image();
+        img.onload = function() {
+			var canvas = document.getElementById('canvas');
+            var ctx = canvas.getContext('2d');
+            ctx.canvas.width = img.width;
+            ctx.canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            
+			var count = mask.maxTextLength(canvas);
+			document.getElementById('aa').innerHTML = '加密文字最大长度为: ' + count + ' 加密图片最大尺寸为: ' + (mask.maxFileSize(canvas)/1024).toFixed(2) + 'KB';
+            //decode();
+        };
+        img.src = event.target.result;
+    };
+    reader.readAsDataURL(e.target.files[0]);
+};
+// encode the image and save it
+var encode = function() {
+    var message = document.getElementById('message').value;
+    var output = document.getElementById('output');
+    var canvas = document.getElementById('canvas');
+	var debug = document.getElementById('debug');
+	var preview = document.getElementById('preview');
+	var ctx = canvas.getContext('2d');
+	ctx.drawImage(preview, 0, 0, preview.width, preview.height);
+	mask.opts.debug = debug.checked;
+	mask.hideText(canvas, message);
+    output.src = canvas.toDataURL();
+	alert("加密成功，可在最底部下载加密后的图片");
+};
+// decode the image and display the contents if there is anything
+var decode = function() {
+    // decode the message with the supplied password
+    var canvas = document.getElementById('canvas');
+    var message = mask.revealText(canvas);
+     document.getElementById('message2').value = message;
+	 alert("解密成功，请看上框栏文字")
+};
+// encode the image and save it
+var encode2 = function() {
+    var output = document.getElementById('output');
+    var canvas = document.getElementById('canvas');
+    var input = document.getElementById('file2');
+	var debug = document.getElementById('debug');
+	var preview = document.getElementById('preview');
+	var ctx = canvas.getContext('2d');
+	ctx.drawImage(preview, 0, 0, preview.width, preview.height);
+	mask.opts.debug = debug.checked;
+	mask.hideFile(canvas, input.files[0], function(result){
+		if(result.success){
+			output.src = canvas.toDataURL();
+		}else{
+			alert(result.message);
+		}
+	});
+};
+function createFileBlob (data, name) {
+  const file = new window.Blob([data], { type: "application/octet-binary" })
+  const fileUrl = window.URL.createObjectURL(file)
+  const files = document.getElementById('files')
+  const link = document.createElement('a')
+  link.setAttribute('href', fileUrl)
+  link.setAttribute('download', name)
+  link.innerText = name + ' - Size: ' + file.size
+  files.appendChild(link);
+}
+// decode the image and display the file if there is anything
+var decode2 = function() {
+    // decode the message with the supplied password
+    var canvas = document.getElementById('canvas');
+    var file = mask.revealFile(canvas);
+	createFileBlob(file.data, file.name);
+};
+  </script>
+ </body>
+</html>
